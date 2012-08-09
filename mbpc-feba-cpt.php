@@ -23,8 +23,12 @@ function mbpc_feba_cpt_install() {
 		$role->add_cap( 'publish_febas' );
 		$role->add_cap( 'create_febas' );
 		$role->add_cap( 'delete_febas' );
+		$role->add_cap( 'delete_published_febas' );
 		$role->add_cap( 'edit_febas' );
+		$role->add_cap( 'edit_published_febas' );
 	}
+
+	flush_rewrite_rules();
 
 }
 
@@ -43,8 +47,12 @@ function mbpc_feba_cpt_deactivate() {
 		$role->remove_cap( 'publish_febas' );
 		$role->remove_cap( 'create_febas' );
 		$role->remove_cap( 'delete_febas' );
+		$role->remove_cap( 'delete_published_febas' );
 		$role->remove_cap( 'edit_febas' );
+		$role->remove_cap( 'edit_published_febas' );
 	}
+
+	flush_rewrite_rules();
 }
 
 
@@ -74,9 +82,26 @@ function mbpc_add_feba_cpt() {
 		'map_meta_cap' => true,
         'rewrite' => array(
             'with_front' => false,
+			'slug' => 'feba'
         )
 		);
 
     /* Register the music album post type. */
     register_post_type( 'feba', $feba_args );
 }
+
+// for new feba posts, hide the default post editor
+// or when editing feba posts, hide the default post editor
+if( ( isset( $_GET['post_type'] ) && 'feba' == $_GET['post_type'] ) ||
+	( isset( $_GET['post'] ) && 'feba' == get_post_type( $_GET['post'] ) ) ) {
+	add_action( 'admin_head', 'mbpc_feba_hide_editor' );
+}
+
+function mbpc_feba_hide_editor() {
+	?>
+		<style>
+			#postdivrich {display:none;}
+		</style>
+	<?php
+}
+
