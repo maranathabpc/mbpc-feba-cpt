@@ -105,3 +105,22 @@ function mbpc_feba_hide_editor() {
 	<?php
 }
 
+add_action( 'add_meta_boxes', 'mbpc_feba_add_upload_box' );
+
+function mbpc_feba_add_upload_box() {
+	add_meta_box(
+		'mbpc_feba_upload',
+		'FEBA Audio Upload',
+		'mbpc_feba_show_box',
+		'feba',
+		'normal'
+	);
+}
+
+function mbpc_feba_show_box( $post ) {
+	// use nonce for verification
+	wp_nonce_field( plugin_basename( __FILE__ ), 'mbpc_feba_upload_nonce' );
+	echo '<input type="file" id="mbpc_feba_file" name="mbpc_feba_file" />';
+	echo '<br />';
+	echo 'Filename format: feba-yyyy-mm-dd.mp3';
+}
