@@ -120,7 +120,43 @@ function mbpc_feba_add_upload_box() {
 function mbpc_feba_show_box( $post ) {
 	// use nonce for verification
 	wp_nonce_field( plugin_basename( __FILE__ ), 'mbpc_feba_upload_nonce' );
+
+	// get attached mp3 file (if any) and show which one is displayed
+	$children = get_children(array('post_parent' => $post->ID, 'post_type' => 'attachment'));
+	if($children) {
+		echo 'Currently attached: <br/>';
+		foreach ($children as $child) {		//there should only be 1 child anyway
+			echo '<a href=\'' . $child->guid . '\'>' . $child->guid . '</a><br />';
+		}
+		echo '<br/>';
+	}
+
 	echo '<input type="file" id="mbpc_feba_file" name="mbpc_feba_file" />';
 	echo '<br />';
 	echo 'Filename format: feba-yyyy-mm-dd.mp3';
+}
+
+add_action( 'save_post', 'mbpc_feba_save_upload' );
+
+function mbpc_feba_save_upload( $post_id ) {
+	// verify if this is an autosave routine
+	// if form hasn't been submitted, don't want to do anything
+	if( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+		return;
+
+	// verify this came from our screen and with proper auth
+	// because save_post can be triggered at other times
+	if( !wp_verify_nonce( $_POST[ 'mbpc_feba_upload_nonce' ], plugin_basename( __FILE__ ) ) )
+		return;
+
+	//check permissions
+	if ( 'page' == $_POST['post_type'] ) {
+		if ( !current_user_can( 'edit_page', $post_id ) )
+			return;
+	}
+	else {
+		if ( !current_user_can( 'edit_post', $post_id ) )
+			return;
+	}
+
 }
