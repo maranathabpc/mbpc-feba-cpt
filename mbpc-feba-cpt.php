@@ -95,6 +95,7 @@ function mbpc_add_feba_cpt() {
 if( ( isset( $_GET['post_type'] ) && 'feba' == $_GET['post_type'] ) ||
 	( isset( $_GET['post'] ) && 'feba' == get_post_type( $_GET['post'] ) ) ) {
 	add_action( 'admin_head', 'mbpc_feba_hide_editor' );
+	add_action( 'admin_head', 'mbpc_feba_add_post_enctype' );
 }
 
 function mbpc_feba_hide_editor() {
@@ -104,6 +105,18 @@ function mbpc_feba_hide_editor() {
 		</style>
 	<?php
 }
+
+// Need to add the following attributes to the overall post form for file uploads to work
+function mbpc_feba_add_post_enctype() {
+	echo '
+		<script type="text/javascript">
+		jQuery(document).ready(function(){
+				jQuery("#post").attr("enctype", "multipart/form-data");
+				jQuery("#post").attr("encoding", "multipart/form-data");
+				});
+	</script>';
+}
+
 
 add_action( 'add_meta_boxes', 'mbpc_feba_add_upload_box' );
 
@@ -157,6 +170,14 @@ function mbpc_feba_save_upload( $post_id ) {
 	else {
 		if ( !current_user_can( 'edit_post', $post_id ) )
 			return;
+	}
+
+	if ( !empty( $_FILES[ 'mbpc_feba_file' ] ) ) {
+		$uploaded_file = $_FILES[ 'mbpc_feba_file' ][ 'name' ];
+		echo $uploaded_file;
+		die();
+	}
+	else {
 	}
 
 }
