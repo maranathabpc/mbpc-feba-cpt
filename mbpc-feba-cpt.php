@@ -259,8 +259,73 @@ function mbpc_feba_archive_template( $template ) {
 
 	// change the loaded template if we're looking at an archive page for the 'feba' CPT
 	// use the included archive-feba.php template file
+	// assumes either twentyeleven or twentyten theme is active
+	// this dependency should be removed with a proper custom archive file
 	if ( is_archive() && $post_type == 'feba' ) {
-		$template = plugin_dir_path( __FILE__ ) . 'archive-feba.php';
+		$template = plugin_dir_path( __FILE__ );
+		if ( function_exists( 'twentyeleven_content_nav' ) )
+			$template .= 'archive-feba-2011.php';
+		else
+			$template .= 'archive-feba-2010.php';
 	}
 	return $template;
+}
+
+add_action( 'generate_rewrite_rules', 'mbpc_feba_rewrite' );
+
+function mbpc_feba_rewrite( $wp_rewrite ) {
+	$rules = mbpc_feba_generate_date_archives( 'feba', $wp_rewrite );
+	$wp_rewrite->rules = array_merge( $rules, $wp_rewrite->rules );
+	return $wp_rewrite;
+}
+
+// to help with debugging by printing out the whole rules array before exiting
+//add_filter( 'rewrite_rules_array', 'mbpc_feba_view_rewrite' );
+function mbpc_feba_view_rewrite( $rules ) {
+	print_r ( $rules );
+	die();
+}
+
+
+// taken from http://www.dev4press.com/2012/tutorials/wordpress/practical/url-rewriting-custom-post-types-date-archive/
+// generates date archive rewrite rules for a given CPT
+function mbpc_feba_generate_date_archives($cpt, $wp_rewrite) {
+	$rules = array();
+
+	$post_type = get_post_type_object($cpt);
+	$slug_archive = $post_type->has_archive;
+	if ($slug_archive === false) return $rules;
+	if ($slug_archive === true) {
+		$slug_archive = $post_type->name;
+	}
+
+	$dates = array(
+			array(
+				'rule' => "([0-9]{4})/([0-9]{1,2})/([0-9]{1,2})",
+				'vars' => array('year', 'monthnum', 'day')),
+			array(
+				'rule' => "([0-9]{4})/([0-9]{1,2})",
+				'vars' => array('year', 'monthnum')),
+			array(
+				'rule' => "([0-9]{4})",
+				'vars' => array('year'))
+			);
+
+	foreach ($dates as $data) {
+		$query = 'index.php?post_type='.$cpt;
+		$rule = $slug_archive.'/'.$data['rule'];
+
+		$i = 1;
+		foreach ($data['vars'] as $var) {
+			$query.= '&'.$var.'='.$wp_rewrite->preg_index($i);
+			$i++;
+		}
+
+		$rules[$rule."/?$"] = $query;
+		$rules[$rule."/feed/(feed|rdf|rss|rss2|atom)/?$"] = $query."&feed=".$wp_rewrite->preg_index($i);
+		$rules[$rule."/(feed|rdf|rss|rss2|atom)/?$"] = $query."&feed=".$wp_rewrite->preg_index($i);
+		$rules[$rule."/page/([0-9]{1,})/?$"] = $query."&paged=".$wp_rewrite->preg_index($i);
+	}
+
+	return $rules;
 }
