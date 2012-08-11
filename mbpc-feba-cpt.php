@@ -251,3 +251,16 @@ function mbpc_feba_save_upload( $post_id ) {
 	}
 
 }
+
+add_filter( 'template_include', 'mbpc_feba_archive_template' );
+
+function mbpc_feba_archive_template( $template ) {
+	$post_type = get_query_var( 'post_type' );
+
+	// change the loaded template if we're looking at an archive page for the 'feba' CPT
+	// use the included archive-feba.php template file
+	if ( is_archive() && $post_type == 'feba' ) {
+		$template = plugin_dir_path( __FILE__ ) . 'archive-feba.php';
+	}
+	return $template;
+}
