@@ -144,6 +144,7 @@ function mbpc_feba_show_box( $post ) {
 		echo '<br/>';
 	}
 
+	//output file input box
 	echo '<input type="file" id="mbpc_feba_file" name="mbpc_feba_file" />';
 	echo '<br />';
 	echo 'Filename format: feba-yyyy-mm-dd.mp3';
@@ -172,12 +173,81 @@ function mbpc_feba_save_upload( $post_id ) {
 			return;
 	}
 
+	// only do all the stuff below if there's a file upload
 	if ( !empty( $_FILES[ 'mbpc_feba_file' ] ) ) {
 		$uploaded_file = $_FILES[ 'mbpc_feba_file' ][ 'name' ];
-		echo $uploaded_file;
-		die();
-	}
-	else {
+		$uploaded_file = basename($uploaded_file);
+		//replace spaces with '-' to facilitate year/mth extraction
+		$uploaded_file = str_replace(' ', '-', $uploaded_file);		
+		$name_parts = explode('-', $uploaded_file);
+
+		$name_parts[0] = strtolower( $name_parts[0] );		//convert prefix to lowercase
+		//assumes 4 part filenames for date operations
+		if( !is_numeric( $name_parts[2] ) ) {	//assume 3 letter month, replace with 2 digit number
+			$month_names = array("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP",
+					"OCT", "NOV", "DEC");
+			$name_parts[2] = strtoupper($name_parts[2]);
+			$name_parts[2] = array_search($name_parts[2], $month_names) + 1;
+		}
+
+		$name_parts[2] = sprintf( '%02u', $name_parts[2] );	//convert mth to 2 digits
+		$last_part = explode('.', $name_parts[3]);			//split file extension and day
+		$last_part[0] = sprintf('%02u', $last_part[0]);		//convert day to 2 digit format
+		$name_parts[3] = implode('.', $last_part);			//combine day and extension
+
+		$time = $name_parts[1] . '-' . $name_parts[2];		//time is in yyyy-mm format
+		if( preg_match( '/[0-9]{4}-[0-1][0-9]/', $time ) == 0 ) {		//time does not match format
+			$time = null;
+		}
+		$_FILES[ 'mbpc_feba_file' ][ 'name' ] = implode('-', $name_parts);			//rename file
+
+		$file = wp_handle_upload( $_FILES[ 'mbpc_feba_file' ], array('test_form' => false), $time );
+		$filename = $file[ 'url' ];
+		if ( !empty( $filename ) ) {
+			$currPost = get_post( $post_id );
+
+			//unattach current attachment, if any
+			//this ensures that each feba post only has 1 mp3 file attached to it
+			//only unattach files with the same prefix as the uploaded one
+			$children = get_children( array( 'post_parent' => $post_id, 'post_type' => 'attachment' ) );
+			if( $children ) {
+				foreach( $children as $child ) {
+					$path_parts = pathinfo( $child->guid );
+					//check if prefix of uploaded file matches prefix of file to be unattached
+					$child_parts = explode( '-', $path_parts['filename']);
+					if( $child_parts[0] == $name_parts [0] ) {
+						wp_update_post(array('ID' => $child->ID, 'post_parent' => 0, 
+									'post_name' => $path_parts['filename'], 
+									'post_title' => $path_parts['filename']));
+					}
+				}
+			}
+
+			//attach attachment post to the main parent post
+			$wp_filetype = wp_check_filetype( basename($filename), null );
+			$attachment = array(
+					'post_mime_type' => $wp_filetype['type'],
+					'post_status' => 'inherit',
+					'guid' => $filename,
+					'post_title' => $currPost -> post_title
+					);
+			$attach_id = wp_insert_attachment( $attachment, $filename, $post_id );
+			// taken from the wp_insert_attachment() codex docs, actually meant for image attachments
+			// you must first include the image.php file
+			// for the function wp_generate_attachment_metadata() to work
+			require_once(ABSPATH . 'wp-admin/includes/image.php');
+			$attach_data = wp_generate_attachment_metadata($attach_id, $filename);
+			wp_update_attachment_metadata($attach_id, $attach_data);
+
+			//update post content with the download text and link to the file
+			//add post content only if it's a sermon type
+			$pos = strpos ( strtoupper( $name_parts[0] ), 'FEBA' );
+			if( $pos !== false ) {
+				$post_content = '[audio:' . $filename . '|titles=' . $currPost -> post_title . ']';
+				$post_content .= '<p>Download MP3: <a href="' . $filename . '">' . $currPost -> post_title . '</a></p>';
+				wp_update_post(array('ID' => $post_id, 'post_content' => $post_content));
+			}
+		}
 	}
 
 }
