@@ -240,12 +240,22 @@ function mbpc_feba_save_upload( $post_id ) {
 			wp_update_attachment_metadata($attach_id, $attach_data);
 
 			//update post content with the download text and link to the file
-			//add post content only if it's a sermon type
+			//add post content only if it's a FEBA type
+			// update post date to match date given in filename
 			$pos = strpos ( strtoupper( $name_parts[0] ), 'FEBA' );
 			if( $pos !== false ) {
 				$post_content = '[audio:' . $filename . '|titles=' . $currPost -> post_title . ']';
 				$post_content .= '<p>Download MP3: <a href="' . $filename . '">' . $currPost -> post_title . '</a></p>';
-				wp_update_post(array('ID' => $post_id, 'post_content' => $post_content));
+
+				// split the last part into day.extension components
+				$day = explode( '.', $name_parts[3] );
+				$post_date = $name_parts[1] . '-' . $name_parts[2] . '-' . $day[0];
+				// append current time to post date
+				$time_str = date( 'H:i:s' );
+				$post_date .= ' ' . $time_str;
+
+				wp_update_post(array('ID' => $post_id, 'post_content' => $post_content, 
+									'post_date' => $post_date, 'post_date_gmt' => $post_date));
 			}
 		}
 	}
