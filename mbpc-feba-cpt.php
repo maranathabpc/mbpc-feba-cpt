@@ -339,3 +339,21 @@ function mbpc_feba_generate_date_archives($cpt, $wp_rewrite) {
 
 	return $rules;
 }
+
+
+// register a sidebar so conditions can be used to display a custom sidebar for this CPT
+add_action( 'widgets_init', 'mbpc_feba_register_sidebar' );
+
+function mbpc_feba_register_sidebar() {
+	// Register a sidebar which will show up when certain conditions are met
+	// depending on sidebar.php 
+	register_sidebar( array(
+		'name' => __( 'FEBA Widget Area', 'mbpc_feba' ),
+		'id' => 'mbpc-feba-widget-area',
+		'description' => __( 'Widget area for FEBA custom post type', 'mbpc_feba' ),
+		'before_widget' => '<li id="%1$s" class="widget-container %2$s">',
+		'after_widget' => '</li>',
+		'before_title' => '<h3 class="widget-title">',
+		'after_title' => '</h3>',
+	) );
+}
