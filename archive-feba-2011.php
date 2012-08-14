@@ -69,5 +69,20 @@ get_header(); ?>
 			</div><!-- #content -->
 		</section><!-- #primary -->
 
-<?php get_sidebar(); ?>
+<?php // display sidebar with only the feba widget area 
+	  // don't call the usual get_sidebar() function as that will load all the other widgets
+	  // use the #secondary id here because in twenty eleven it's given float:right
+
+ 		if( 'feba' == get_post_type() ) : ?>
+
+		<div id="secondary" class="widget-area" role="complementary">
+			<ul class="xoxo">
+
+<?php
+	   dynamic_sidebar( 'mbpc-feba-widget-area' )  ?>
+
+			</ul>
+		</div><!-- #feba .widget-area -->
+
+<?php endif; ?>
 <?php get_footer(); ?>

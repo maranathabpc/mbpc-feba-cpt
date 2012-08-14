@@ -358,16 +358,4 @@ function mbpc_feba_register_sidebar() {
 	) );
 }
 
-// hook into the get_sidebar hook and load my own template file
-// for the FEBA custom post type
-add_action( 'get_sidebar', 'mbpc_feba_hijack_sidebar' );
 
-function mbpc_feba_hijack_sidebar() {
-	$post_type = get_query_var( 'post_type' );
-
-	if ( $post_type == 'feba' ) {
-		$template = plugin_dir_path( __FILE__ );
-		$template .= 'sidebar-feba.php';
-		load_template( $template );
-	}
-}
