@@ -51,6 +51,10 @@ get_header(); ?>
 	/* Run the loop for the archives page to output the posts.
 	 * If you want to overload this in a child theme then include a file
 	 * called loop-archive.php and that will be used instead.
+	 * There is a dependency on the MBPC child theme. Output is wrong if default
+	 * loop in twentyten is used as it'll show the_excerpt() for archives, which 
+	 * does not process the shortcode for the audio player.
+	 *
 	 */
 	 get_template_part( 'loop', 'sermons' );
 ?>

@@ -269,7 +269,7 @@ function mbpc_feba_archive_template( $template ) {
 
 	// change the loaded template if we're looking at an archive page for the 'feba' CPT
 	// use the included archive-feba.php template file
-	// assumes either twentyeleven or twentyten theme is active
+	// assumes either twentyeleven or MBPC theme (child theme of twentyten) is active
 	// this dependency should be removed with a proper custom archive file
 	if ( is_archive() && $post_type == 'feba' ) {
 		$template = plugin_dir_path( __FILE__ );
@@ -278,6 +278,7 @@ function mbpc_feba_archive_template( $template ) {
 		else
 			$template .= 'archive-feba-2010.php';
 	}
+	//TODO add code here for a single post template so it'll load the proper sidebar
 	return $template;
 }
 
