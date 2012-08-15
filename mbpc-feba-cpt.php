@@ -268,10 +268,13 @@ function mbpc_feba_archive_template( $template ) {
 	$post_type = get_query_var( 'post_type' );
 
 	// change the loaded template if we're looking at an archive page for the 'feba' CPT
-	// use the included archive-feba.php template file
+	// use the included archive-feba-{theme}.php template file
+	// if archive-feba.php exists in the theme directory, use that instead. this allows 
+	// themes to override the plugin provided templates. views go into themes.
+	//
 	// assumes either twentyeleven or MBPC theme (child theme of twentyten) is active
 	// this dependency should be removed with a proper custom archive file
-	if ( is_archive() && $post_type == 'feba' ) {
+	if ( is_archive() && $post_type == 'feba' && strpos( $template, 'archive-feba.php' ) === FALSE ) {
 		$template = plugin_dir_path( __FILE__ );
 		if ( function_exists( 'twentyeleven_content_nav' ) )
 			$template .= 'archive-feba-2011.php';
