@@ -274,15 +274,33 @@ function mbpc_feba_archive_template( $template ) {
 	//
 	// assumes either twentyeleven or MBPC theme (child theme of twentyten) is active
 	// this dependency should be removed with a proper custom archive file
-	if ( is_archive() && $post_type == 'feba' && strpos( $template, 'archive-feba.php' ) === FALSE ) {
-		$template = plugin_dir_path( __FILE__ );
+	if ( is_post_type_archive( 'feba' ) && mbpc_feba_template_exists( $template ) == false ) {
 		if ( function_exists( 'twentyeleven_content_nav' ) )
-			$template .= 'archive-feba-2011.php';
+			$template = plugin_dir_path( __FILE__ ) . 'templates/archive-feba-2011.php';
 		else
-			$template .= 'archive-feba-2010.php';
+			$template = plugin_dir_path( __FILE__ ) . 'templates/archive-feba-2010.php';
 	}
-	//TODO add code here for a single post template so it'll load the proper sidebar
+	
+	if ( is_single() && $post_type == 'feba' && mbpc_feba_template_exists( $template ) == false) {
+		// twenty eleven's single.php isn't meant to be used with a sidebar, so just stick with that
+		if ( function_exists( 'twentyeleven_content_nav' ) );
+		else
+			$template = plugin_dir_path( __FILE__ ) . 'templates/single-feba-2010.php';
+	}
 	return $template;
+}
+
+/* Check if {template}-feba.php template already exists in the theme folder
+ *
+ */
+function mbpc_feba_template_exists( $template_path ) {
+	$template = basename( $template_path );
+	
+	// check if the template WordPress has picked from the theme/child theme already handles the CPT
+	if ( 1 == preg_match( '/^(\S*)-feba.php/', $template ) )
+		return true;
+
+	return false;
 }
 
 add_action( 'generate_rewrite_rules', 'mbpc_feba_rewrite' );
