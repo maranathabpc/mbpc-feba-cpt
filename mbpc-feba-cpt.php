@@ -59,6 +59,9 @@ function mbpc_feba_cpt_deactivate() {
 
 add_action( 'init', 'mbpc_add_feba_cpt' );
 
+/*  Register the custom post type for FEBA
+ *
+ */
 function mbpc_add_feba_cpt() {
 	 /* Set up the arguments for the 'FEBA' post type. */
     $feba_args = array(

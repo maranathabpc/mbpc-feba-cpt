@@ -29,15 +29,12 @@ get_header(); ?>
 ?>
 
 			<h1 class="page-title">
-				FEBA 
 <?php if ( is_day() ) : ?>
-				<?php printf( __( 'Daily Archives: <span>%s</span>', 'twentyten' ), get_the_date() ); ?>
+				<?php printf( __( 'FEBA Daily Archives: <span>%s</span>', 'twentyten' ), get_the_date() ); ?>
 <?php elseif ( is_month() ) : ?>
-				<?php printf( __( 'Monthly Archives: <span>%s</span>', 'twentyten' ), get_the_date( 'F Y' ) ); ?>
+				<?php printf( __( 'FEBA Monthly Archives: <span>%s</span>', 'twentyten' ), get_the_date( 'F Y' ) ); ?>
 <?php elseif ( is_year() ) : ?>
-				<?php printf( __( 'Yearly Archives: <span>%s</span>', 'twentyten' ), get_the_date( 'Y' ) ); ?>
-<?php else : ?>
-				<?php _e( 'Blog Archives', 'twentyten' ); ?>
+				<?php printf( __( 'FEBA Yearly Archives: <span>%s</span>', 'twentyten' ), get_the_date( 'Y' ) ); ?>
 <?php endif; ?>
 			</h1>
 
