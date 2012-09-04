@@ -3,7 +3,7 @@
 Plugin Name: MBPC FEBA Custom Post Type Plugin
 Plugin URI: http://example.com/wordpress-plugins/my-plugin
 Description: Adds a custom post type for FEBA messages to the website
-Version: 1.0
+Version: 1.1
 Author: fonglh
 Author URI: https://wpadventures.wordpress.com
 License: GPLv2
@@ -89,8 +89,32 @@ function mbpc_add_feba_cpt() {
         )
 		);
 
-    /* Register the music album post type. */
+    /* Register the feba post type. */
     register_post_type( 'feba', $feba_args );
+
+	//register taxonomy for the feba post type
+	register_taxonomy(
+			'station',
+			array('feba'),
+			array(
+				'labels'=>array(
+					'name'=>__('Radio Stations'),
+					'singular_name'=>__('Station'),
+					'select_name' => __( 'Select Radio Station' ),
+					'search_items'=>__('Search for Radio Station'),
+					'popular_items'=>__('Popular Radio Stations'),
+					'all_items'=>__('All Radio Stations'),
+					'edit_item'=>__('Edit Radio Station'),
+					'update_item'=>__('Update Radio Station'),
+					'add_new_item'=>__('Add New Radio Station'),
+					'new_item_name'=>__('Name of Radio Station'),
+					'add_or_remove_items'=>__('Add or remove Radio Stations')
+					),
+				'hierarchical'=>true,
+				'capabilities' => array('assign_terms' => 'edit_febas')
+				)
+			);
+
 }
 
 // for new feba posts, hide the default post editor
